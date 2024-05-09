@@ -9,7 +9,9 @@ const stylesHandler = 'style-loader';
 const config = {
     entry: {
         content: './src/content.js',
-        background: './src/background.js'
+        background: './src/background.js',
+        "server-verifier": "./src/server-verifier.js", 
+        "account-control": "./src/account-control.js" 
     },
     output: {
         path: path.resolve(__dirname, 'dist'),

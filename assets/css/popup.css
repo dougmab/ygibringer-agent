@@ -1,25 +1,189 @@
 * {
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
+}
+
+/* account.html */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 5px;
+    height: 60px;
+}
+
+.profile-icon {
+    position: relative;
+    top: 35px;
+    left: 15px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: white;
+    padding: 2px;
+    border: solid 5px #14143f;
+}
+
+.profile-icon img {
+    width: 100%;
+}
+
+.settings-icon {
+    width: 24px;
+    height: 24px;
+    background-image: url("../img/settings.svg");
+    background-size: cover;
+}
+
+.settings-icon:hover {
+    background-image: url("../img/settings_fill.svg");
 }
 
 .container {
-    width: 280px;
-    color: #14143f;
-}
-
-.title {
-    font-size: 18px;
-    margin: 5px 10px;
+    width: 330px;
+    color: #fff;
+    background-color: #14143f;
 }
 
 .account {
-    background-color: #14143f;
-    color: #fff;
+    background-color: #fff;
+    color: #242424;
     padding: 10px;
     border-radius: 5px 5px 0 0;
 }
 
 .account h2 {
+    margin-top: 25px;
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.account p {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+
+.account span {
+    margin-left: 5px;
+}
+
+.account p .show-icon {
+    width: 18px;
+    height: 18px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+
+.status-group {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+}
+
+.status-btn {
+    background-color: #fff0;
+    padding: 5px 13px;
+    border-radius: 5px;
+    border: solid 2px;
     font-size: 14px;
+}
+
+.clr-gr {
+    border-color: #04e004;
+    color: #04e004;
+}
+
+.clr-gr:hover {
+    background-color: #04e004;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* status.html */
+
+.status-container {
+    width: 330px;
+    color: #fff;
+    background-color: #fff;
+    padding: 10px;
+}
+
+.status-list {
+    width: 70%;
+    margin: auto;
+    /* margin-top: 10px; */
+}
+
+.status-list button {
+    width: 100%;
+}
+
+.clr-rd {
+    border-color: #ff0f0f;
+    color: #ff0f0f;
+}
+
+.clr-rd:hover {
+    background-color: #ff0f0f;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* verify-server.html */
+.verify-container {
+        width: 330px;
+        color: #242424;
+        padding: 5px 10px 20px;
+}
+
+.verify-container h1 {
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
+.center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+.loading-icon {
+    opacity: 0.5;
+    animation: spinningIcon 1500ms linear infinite;
+}
+
+.fail-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.fail-message {
+    font-size: 14px;
+    text-align: center;
+}
+
+.fail-message .status-btn {
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+@keyframes spinningIcon {
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
 }
