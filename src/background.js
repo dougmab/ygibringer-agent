@@ -11,11 +11,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 })
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log(sender)
-
-
+    console.log(sender, message.action)
+    
     if (message.action == "get_account") {
         getCurrentAccount(currentAccount => {
+            console.log(currentAccount)
             if (currentAccount) {
                 sendResponse({ status: "ok", account: currentAccount });
                 return;
@@ -28,7 +28,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action == "next_account") {
         getNextAccount()
             .then(account => sendResponse({ status: "ok", account }))
-            .catch(err = sendResponse({ status: "err", message: err.message}));
+            .catch(err => sendResponse({ status: "error", error: err }));
+    }
+
+    if (message.action == "send_account") {
+        getCurrentAccount(currentAccount => {
+            fetch(`http://127.0.0.1:8080/done?id=${currentAccount.id}${message.status ? "&status=" + message.status : ""}${message.type ? "&type=" + message.type : ""}`)
+                .then(response => response.json())
+                .then(account => sendResponse({ status: "ok", account }))
+                .catch(err => sendResponse({ status: "error", error: err }));
+        })
     }
 
     if (message.action == "check_server") {
@@ -49,11 +58,12 @@ const getCurrentAccount = callback => {
 }
 
 const getNextAccount = () => {
+    console.log("Getting next account")
     return fetch('http://127.0.0.1:8080/next')
         .then(response => response.json())
         .then(account => {
             chrome.storage.local.set(account);
             return account
         })
-        .catch(e => ({ status: "error", message: e.message }))
+        .catch(err => ({ status: "error", error: err }))
 }

@@ -62,6 +62,7 @@
 .account p {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     font-size: 18px;
     margin-bottom: 2px;
     font-weight: 600;
@@ -76,6 +77,7 @@
     height: 18px;
     margin-left: 5px;
     cursor: pointer;
+    opacity: 0.7;
 }
 
 

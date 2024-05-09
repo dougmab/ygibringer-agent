@@ -1,4 +1,4 @@
-const tryAgain = document.querySelector("#try-again-btn")
+const tryAgainBtn = document.querySelector("#try-again-btn")
 const failContent = document.querySelector(".fail-message")
 const loadingIcon = document.querySelector(".loading-icon");
 
@@ -22,4 +22,4 @@ const checkServer = () => {
 }
 
 checkServer();
-tryAgain.addEventListener("click", checkServer);
+tryAgainBtn.addEventListener("click", checkServer);
