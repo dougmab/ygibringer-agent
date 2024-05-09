@@ -1,0 +1,26 @@
+{
+    "name": "YgiBringer Agent",
+    "version": "0.0.1",
+    "description": "Receptor de contas do YgiBringer.",
+    "permissions": ["storage", "tabs", "http://localhost/*"],
+    "host_permissions": ["https://*.instagram.com/*"],
+    "background": {
+      "service_worker": "dist/background.bundle.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://*.instagram.com/*"],
+        "js": ["dist/content.bundle.js"],
+        "css": ["assets/css/content.css"]
+      }
+    ],
+    "action" : {
+        "default_icons": {
+            "48": "assets/img/icon.png",
+            "128": "assets/img/icon.png"
+          },
+        "default_title": "YgiBringer Agent",
+        "default_popup": "popup.html"
+    },
+    "manifest_version": 3
+  }

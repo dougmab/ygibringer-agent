@@ -1,0 +1,25 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+.container {
+    width: 280px;
+    color: #14143f;
+}
+
+.title {
+    font-size: 18px;
+    margin: 5px 10px;
+}
+
+.account {
+    background-color: #14143f;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px 5px 0 0;
+}
+
+.account h2 {
+    font-size: 14px;
+}
