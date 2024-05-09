@@ -1,6 +1,6 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status == "complete") {
-        if (tab.url && tab.url.includes("instagram.com/accounts/login/")) {
+        if (tab.url && (tab.url.includes("instagram.com/accounts/login/") || tab.url.endsWith("instagram.com/"))) {
             console.log("login page")
     
             chrome.tabs.sendMessage(tabId, {
