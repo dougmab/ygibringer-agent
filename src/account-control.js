@@ -45,7 +45,9 @@ const sendAccountWithOkStatus = () => {
     chrome.runtime.sendMessage({ action: "send_account", status: "OK" }, (message) => {
         console.log(message)
         if (message.status != "ok") {} // TODO: Mensagem de erro no popup
-        
+
+        if (isPasswordShowing) togglePasswordCensor();
+
         // TODO: Mensagem de operação bem-sucedida
         chrome.runtime.sendMessage({ action: "next_account" }, (message) => {
             if (message.status == "ok") setProfile();

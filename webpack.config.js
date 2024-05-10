@@ -11,6 +11,7 @@ const config = {
         content: './src/content.js',
         background: './src/background.js',
         "server-verifier": "./src/server-verifier.js", 
+        "status-options": "./src/status-options.js", 
         "account-control": "./src/account-control.js" 
     },
     output: {
