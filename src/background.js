@@ -19,6 +19,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.action == "send_account") sendAccountRequest(message, sender, sendResponse);
 
+    if (message.action == "get_status") getCustomStatusRequest(message, sender, sendMessage);
+
     if (message.action == "check_server") checkServerRequest(message, sender, sendResponse);
 
     return true;
@@ -33,20 +35,20 @@ const getCurrentAccount = callback => {
 
 const getNextAccount = () => {
     console.log("Getting next account")
-    return fetch('http://127.0.0.1:8080/next')
+    return fetch('http://127.0.0.1:8080/account/next')
         .then(response => response.json())
-        .then(account => {
-            chrome.storage.local.set(account);
-            return account
+        .then(response => {
+            chrome.storage.local.set(response.data);
+            return response.data
         })
-        .catch(err => ({ status: "error", error: err }))
+        .catch(err => ({ success: false, error: err }))
 }
 
 const getAccountRequest = (message, sender, sendResponse) => {
     getCurrentAccount(currentAccount => {
         console.log(currentAccount)
         if (currentAccount) {
-            sendResponse({ status: "ok", account: currentAccount });
+            sendResponse({ success: true, data: currentAccount });
             return;
         }
         getNextAccount();
@@ -56,22 +58,29 @@ const getAccountRequest = (message, sender, sendResponse) => {
 
 const nextAccountRequest = (message, sender, sendResponse) => {
     getNextAccount()
-            .then(account => sendResponse({ status: "ok", account }))
-            .catch(err => sendResponse({ status: "error", error: err }));
+            .then(account => sendResponse({ success: true, data: account }))
+            .catch(err => sendResponse({ success: false, error: err }));
 }
 
 const sendAccountRequest = (message, sender, sendResponse) => {
     getCurrentAccount(currentAccount => {
-        fetch(`http://127.0.0.1:8080/done?id=${currentAccount.id}${message.status ? "&status=" + message.status : ""}${message.type ? "&type=" + message.type : ""}`)
+        fetch(`http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}`)
             .then(response => response.json())
-            .then(account => sendResponse({ status: "ok", account }))
-            .catch(err => sendResponse({ status: "error", error: err }));
+            .then(data => sendResponse(data))
+            .catch(err => sendResponse({ success: false, error: err }));
     })
 }
 
 const checkServerRequest = (message, sender, sendResponse) => {
-    fetch("http://127.0.0.1:8080/")
+    fetch("http://127.0.0.1:8080/info/health")
             .then(response => response.json())
-            .then(data => sendResponse({ status: "ok", ...data }))
-            .catch(err => sendResponse({ status: "offline" }));
+            .then(data => sendResponse(data))
+            .catch(err => sendResponse({ success: false }));
+}
+
+const getCustomStatusRequest = (message, sender, sendResponse) => {
+    fetch(`http://127.0.0.1:8080/status`)
+            .then(response => response.json())
+            .then(data => sendResponse(data))
+            .catch(err => sendResponse({ success: false, error: err }));    
 }
