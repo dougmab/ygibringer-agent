@@ -39,14 +39,15 @@ const getNextAccount = () => {
         .then(response => {
             if (response.status === 204) {
                 chrome.storage.local.remove(["token", "login", "password"], () => {});
-                return;
+                return ({ success: false, error: { type: "end_of_list", message: "List has reached it's end"} });
             }
             return response.json()
         })
         .then(response => {
             if (response.success) {
+                console.log(response, "next")
                 chrome.storage.local.set(response.data);
-                return response.data
+                return response
             }
         })
         .catch(err => ({ success: false, error: err }))
@@ -59,8 +60,8 @@ const getAccountRequest = (message, sender, sendResponse) => {
             sendResponse({ success: true, data: currentAccount });
             return;
         }
-        getNextAccount();
-        getCurrentAccount(this);
+        getNextAccount()
+            .then(response => sendResponse(response));
     })
 }
 

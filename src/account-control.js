@@ -43,7 +43,6 @@ const getCustomStatus = () => {
 
             btn.addEventListener("click", updateAccount);
 
-            console.log(btn);
             statusGroup.querySelector("." + status.type.toLowerCase()).appendChild(btn);
         }
     })
