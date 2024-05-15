@@ -1,6 +1,8 @@
 const sendBtn = document.querySelector("#success-btn");
 const userInput = document.querySelector("#login");
-const passInput = document.querySelector("#password")
+const passInput = document.querySelector("#password");
+
+const statusGroup = document.querySelector(".status-group");
 
 const showBtn = document.querySelector(".show-icon");
 let isPasswordShowing = false;
@@ -11,17 +13,39 @@ const setProfile = () => {
 
     chrome.runtime.sendMessage({ action: "get_account" }, (response) => {
         const userInput = document.querySelector("#login");
-        const passInput = document.querySelector("#password")
+        const passInput = document.querySelector("#password");
 
         console.log(response, "popup");
 
-        const { login, password } = response.account;
+        const { login, password } = response.data;
 
         console.log(login);
 
         userInput.textContent = login;
         passInput.textContent = passwordCensor;
         passInput.setAttribute('data-password', password);
+    })
+}
+
+const getCustomStatus = () => {
+    chrome.runtime.sendMessage({ action: "get_status" }, (message) => {
+
+        if (!message.success) return;
+
+        for (const i in message.data) {
+            const status = message.data[i]; 
+            console.log(status);
+
+            const btn = document.createElement("button");
+            btn.className = `status-btn clr-${status.type == "SUCCESS" ? "gr" : "rd"}`;
+            btn.setAttribute("data-index", i);
+            btn.textContent = status.title;
+
+            btn.addEventListener("click", updateAccount);
+
+            console.log(btn);
+            statusGroup.querySelector("." + status.type.toLowerCase()).appendChild(btn);
+        }
     })
 }
 
@@ -41,21 +65,23 @@ const togglePasswordCensor = () => {
     isPasswordShowing = true;
 }
 
-const sendAccountWithOkStatus = () => {
-    chrome.runtime.sendMessage({ action: "send_account", status: "OK" }, (message) => {
-        console.log(message)
-        if (message.status != "ok") {} // TODO: Mensagem de erro no popup
+const updateAccount = (event) => {
+    console.log(event.target.dataset.index);
+    chrome.runtime.sendMessage({ action: "update_account", status: event.target.dataset.index }, (message) => {
+        console.log(message);
+        if (!message.success) {} // TODO: Mensagem de erro no popup
 
         if (isPasswordShowing) togglePasswordCensor();
 
         // TODO: Mensagem de operação bem-sucedida
         chrome.runtime.sendMessage({ action: "next_account" }, (message) => {
-            if (message.status == "ok") setProfile();
+            if (message.success) setProfile();
         })
     })
 }
 
-sendBtn.addEventListener("click", sendAccountWithOkStatus)
+// sendBtn.addEventListener("click", sendAccountWithOkStatus)
 showBtn.addEventListener("click", togglePasswordCensor)
 
 setProfile();
+getCustomStatus();

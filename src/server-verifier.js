@@ -8,8 +8,9 @@ const checkServer = () => {
 
     chrome.runtime.sendMessage({ action: "check_server"}, (response) => {
         console.log('iniciou')
+        console.log(response);
 
-        if (response.status == "ok") {
+        if (response.success) {
             window.location.href = "view/account.html";
             return;
         };

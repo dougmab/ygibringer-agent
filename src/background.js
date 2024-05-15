@@ -17,9 +17,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         
     if (message.action == "next_account") nextAccountRequest(message, sender, sendResponse);
 
-    if (message.action == "send_account") sendAccountRequest(message, sender, sendResponse);
+    if (message.action == "update_account") updateAccountRequest(message, sender, sendResponse);
 
-    if (message.action == "get_status") getCustomStatusRequest(message, sender, sendMessage);
+    if (message.action == "get_status") getCustomStatusRequest(message, sender, sendResponse);
 
     if (message.action == "check_server") checkServerRequest(message, sender, sendResponse);
 
@@ -27,7 +27,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 })
 
 const getCurrentAccount = callback => {
-    chrome.storage.local.get(['id', 'login', 'password'], data => {
+    chrome.storage.local.get(['token', 'login', 'password'], data => {
         const currentAccount = { ...data };
         callback(currentAccount);
     })
@@ -36,10 +36,18 @@ const getCurrentAccount = callback => {
 const getNextAccount = () => {
     console.log("Getting next account")
     return fetch('http://127.0.0.1:8080/account/next')
-        .then(response => response.json())
         .then(response => {
-            chrome.storage.local.set(response.data);
-            return response.data
+            if (response.status === 204) {
+                chrome.storage.local.remove(["token", "login", "password"], () => {});
+                return;
+            }
+            return response.json()
+        })
+        .then(response => {
+            if (response.success) {
+                chrome.storage.local.set(response.data);
+                return response.data
+            }
         })
         .catch(err => ({ success: false, error: err }))
 }
@@ -47,7 +55,7 @@ const getNextAccount = () => {
 const getAccountRequest = (message, sender, sendResponse) => {
     getCurrentAccount(currentAccount => {
         console.log(currentAccount)
-        if (currentAccount) {
+        if (currentAccount.token) {
             sendResponse({ success: true, data: currentAccount });
             return;
         }
@@ -62,9 +70,9 @@ const nextAccountRequest = (message, sender, sendResponse) => {
             .catch(err => sendResponse({ success: false, error: err }));
 }
 
-const sendAccountRequest = (message, sender, sendResponse) => {
+const updateAccountRequest = (message, sender, sendResponse) => {
     getCurrentAccount(currentAccount => {
-        fetch(`http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}`)
+        fetch(`http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}`, { method: "PUT"})
             .then(response => response.json())
             .then(data => sendResponse(data))
             .catch(err => sendResponse({ success: false, error: err }));

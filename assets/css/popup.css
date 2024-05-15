@@ -85,7 +85,14 @@
     margin-top: 20px;
     display: flex;
     justify-content: space-between;
-    align-items: end;
+    /* flex-wrap: wrap; */
+    /* overflow-x: auto; */
+}
+
+.status-group div {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
 }
 
 .status-btn {
@@ -94,6 +101,7 @@
     border-radius: 5px;
     border: solid 2px;
     font-size: 14px;
+    margin: 3px 0;
 }
 
 .clr-gr {
@@ -124,6 +132,7 @@
 
 .status-list button {
     width: 100%;
+    margin-bottom: 10px;
 }
 
 .clr-rd {
