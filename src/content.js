@@ -31,12 +31,12 @@
         e.preventDefault();
          chrome.runtime.sendMessage({ action: "get_account" }, (response) => {
             console.log(response)
-            if (response.status == "error") {
+            if (!response.success) {
                 console.log(response.message);
                 return;
             }
 
-            const { id, login, password } = response.account;
+            const { login, password } = response.data;
 
             const userInput = document.querySelector('input[name="username"');
             const passInput = document.querySelector('input[name="password"');
