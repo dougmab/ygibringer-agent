@@ -1,13 +1,34 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status == "complete") {
-        if (tab.url && (tab.url.includes("instagram.com/accounts/login/") || tab.url.endsWith("instagram.com/"))) {
+    if (changeInfo.status == "complete" && tab.url) {
+        console.log(tab.url)
+        if (tab.url.includes("instagram.com/accounts/login/")) {
             console.log("login page")
     
             chrome.tabs.sendMessage(tabId, {
                 action: "add_button"
             });
         }
+
+        if (tab.url.endsWith("instagram.com/")) {
+            checkLoginStateAndExecute(
+                // If logged
+                () => {
+                    chrome.tabs.update(tabId, { url: "https://www.instagram.com/accounts/convert_to_professional_account/" });
+                },
+                // If not logged
+                () => {
+                    chrome.tabs.sendMessage(tabId, {
+                        action: "add_button"
+                    });
+                })
+        }
+
+        if (tab.url.includes("instagram.com/accounts/onetap/")) {
+            console.log("onetap")
+            chrome.tabs.update(tabId, { url: "https://www.instagram.com/accounts/convert_to_professional_account/" });
+        }
     }
+
 })
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -30,6 +51,18 @@ const getCurrentAccount = callback => {
     chrome.storage.local.get(['token', 'login', 'password'], data => {
         const currentAccount = { ...data };
         callback(currentAccount);
+    })
+}
+
+const checkLoginStateAndExecute = (isLoggedCallback, isNotLoggedCallback)  => {
+    chrome.cookies.getAll({ domain: "instagram.com", name: "sessionid"}, cookie => {
+        if (cookie[0] && isLoggedCallback) {
+            console.log("Logged in")
+            isLoggedCallback();
+            return;
+        }
+        console.log("Not logged in")
+        if (isNotLoggedCallback) isNotLoggedCallback();
     })
 }
 
@@ -76,7 +109,7 @@ const updateAccountRequest = (message, sender, sendResponse) => {
         fetch(`http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}`, { method: "PUT"})
             .then(response => response.json())
             .then(data => {
-                // Remove os cookies do site
+                // Remove cookie sessionid do site
                 chrome.cookies.getAll({ domain: "instagram.com", name: "sessionid"}, cookie => {
                     if (cookie[0]) {
                         console.log(cookie[0]);
@@ -87,7 +120,7 @@ const updateAccountRequest = (message, sender, sendResponse) => {
                 chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
                     if (tabs.length > 0) {
                         console.log(tabs[0].id, "TabID");
-                        chrome.tabs.sendMessage(tabs[0].id, { action: "update_tab" });
+                        chrome.tabs.update(tabs[0].id, { url: "https://www.instagram.com/" });
                     }
                 })
                 sendResponse(data);

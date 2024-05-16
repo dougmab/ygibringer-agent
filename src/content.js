@@ -7,11 +7,6 @@
             console.log("YgiBringer login added")
             insertLoginButton();
         }
-
-        if (action == "update_tab") {
-            console.log("logout")
-            window.location.href = "https://instagram.com"
-        }
     });
 
     const insertLoginButton = () => {
@@ -26,10 +21,9 @@
             const loginBtn = document.createElement("button");
             loginBtn.textContent = "Entrar com YgiBringer";
             loginBtn.className = "login-ab-btn";
-
             loginBtn.addEventListener("click", getCurrentAccount);
 
-            submitParent.appendChild(loginBtn);  
+            submitParent.appendChild(loginBtn);
         }, 1000)      
     }
 
@@ -48,6 +42,7 @@
             const passInput = document.querySelector('input[name="password"');
             writeToInput(userInput, login);
             writeToInput(passInput, password);
+            submit.click();
         }); 
     }
 
