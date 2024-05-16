@@ -1,8 +1,8 @@
-const sendBtn = document.querySelector("#success-btn");
+const sendBtn = document.querySelector("#send-btn");
 const userInput = document.querySelector("#login");
 const passInput = document.querySelector("#password");
 
-const statusGroup = document.querySelector(".status-group");
+const statusSelect = document.querySelector("#status-select");
 
 const showBtn = document.querySelector(".show-icon");
 let isPasswordShowing = false;
@@ -32,19 +32,36 @@ const getCustomStatus = () => {
 
         if (!message.success) return;
 
+        let isFirstOptAppended = false;
         for (const i in message.data) {
             const status = message.data[i]; 
             console.log(status);
 
-            const btn = document.createElement("button");
-            btn.className = `status-btn clr-${status.type == "SUCCESS" ? "gr" : "rd"}`;
-            btn.setAttribute("data-index", i);
-            btn.textContent = status.title;
+            const option = document.createElement("option");
+            option.className = `clr-${status.type == "SUCCESS" ? "gr" : "rd"}`;
+            option.setAttribute("data-index", i);
+            option.setAttribute("data-type", status.type);
+            option.textContent = status.title;
+            option.value = status.value;
 
-            btn.addEventListener("click", updateAccount);
+            // option.addEventListener("click", updateAccount);
 
-            statusGroup.querySelector("." + status.type.toLowerCase()).appendChild(btn);
+            if (!isFirstOptAppended) {
+                statusSelect.className = `select-${status.type.toLowerCase()}-opt`;
+                isFirstOptAppended = true;
+            }
+
+            statusSelect.appendChild(option);
+
         }
+
+        statusSelect.addEventListener('change', (e) => {
+            const select = e.target;
+            const option = select.options[select.selectedIndex];
+            console.log(option);
+
+            select.className = `select-${option.dataset.type.toLowerCase()}-opt`;
+          });
     })
 }
 
@@ -65,22 +82,23 @@ const togglePasswordCensor = () => {
 }
 
 const updateAccount = (event) => {
-    console.log(event.target.dataset.index);
-    chrome.runtime.sendMessage({ action: "update_account", status: event.target.dataset.index }, (message) => {
+    chrome.runtime.sendMessage({ action: "update_account", status: statusSelect.options[statusSelect.selectedIndex].dataset.index }, (message) => {
         console.log(message);
         if (!message.success) {} // TODO: Mensagem de erro no popup
 
         if (isPasswordShowing) togglePasswordCensor();
+        
+        // console.log(message, "Account updated popup")
+        setProfile();
 
         // TODO: Mensagem de operação bem-sucedida
         // chrome.runtime.sendMessage({ action: "next_account" }, (message) => {
-        //     if (message.success) setProfile();
         // })
         // update_account agora pega a próxima conta
     })
 }
 
-// sendBtn.addEventListener("click", sendAccountWithOkStatus)
+sendBtn.addEventListener("click", updateAccount)
 showBtn.addEventListener("click", togglePasswordCensor)
 
 setProfile();

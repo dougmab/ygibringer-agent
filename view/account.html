@@ -3,25 +3,35 @@
 <script type="module" src="/dist/account-control.bundle.js"></script>
 
 <div class="container">
-  <div>
     <div class="header">
-      <div class="profile-icon">
-        <img src="/assets/img/profile.svg" alt="">
-      </div>
-      <a href="/view/settings.html" class="settings-icon"></a>
+      <div class="header-title"><h1>YgiBringer</h1></div>
+        <a href="/view/settings.html" class="settings-icon"></a>
     </div>
 
     <div class="account">
         <h2>Conta atual</h2>
-        <p>Login: <span id="login">thomas.jeff193</span></p>
-        <!-- tá uma bagunça, vou arrumar depois -->
-        <p>Senha: <span style="display: flex; align-items: center;"><span id="password">********</span><img src="/assets/img/visibility.svg" class="show-icon"></span></p>
-        <div class="status-group">
+        <div class="input-box">
+          <label for="login">Login</label>
+          <div id="login"></div>
+        </div>
+        
+        <div class="input-box">
+          <label for="">Senha</label>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div id="password"></div><img src="/assets/img/visibility.svg" class="show-icon">
+          </div>
+        </div>
+
+        <!-- <div class="status-group">
           <div class="error"></div>
           <div class="success"></div>
-          <!-- <a href="/view/status.html"><img src="/assets/img/more.svg" alt=""></a>
-          <button class="status-btn clr-gr" id="success-btn">Ok</button> -->
+          <a href="/view/status.html"><img src="/assets/img/more.svg" alt=""></a>
+          <button class="status-btn clr-gr" id="success-btn">Ok</button>
+        </div> -->
+
+        <div class="send-control">
+          <select name="status" id="status-select"></select>
+          <button class="primary-btn" id="send-btn">Enviar</button>
         </div>
     </div>
-  </div>
 </div>

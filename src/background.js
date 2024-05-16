@@ -134,8 +134,9 @@ const updateAccountRequest = (message, sender, sendResponse) => {
                         chrome.tabs.update(tabs[0].id, { url: "https://www.instagram.com/" });
                     }
                 })
-                sendResponse(data);
-                getNextAccount();
+                getNextAccount()
+                .then(data => sendResponse(data));
+                // sendResponse(data);
             })
             .catch(err => sendResponse({ success: false, error: `http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}` }));
     })

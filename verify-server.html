@@ -2,8 +2,11 @@
 <link href="/assets/css/popup.css" rel="stylesheet" type="text/css" />
 <script type="module" src="/dist/server-verifier.bundle.js"></script>
 
-<div class="verify-container">
-    <h1>YgiBringer Agent</h1>
+<div class="container">
+    <div class="header">
+        <div class="header-title"><h1>YgiBringer</h1></div>
+          <a href="/view/settings.html" class="settings-icon"></a>
+      </div>
     <div class="center">
         <img src="/assets/img/sync.svg" alt="" class="loading-icon">
         <div class="fail-message" hidden>
@@ -11,7 +14,7 @@
                 Não foi possível conectar ao servidor.<br/>
                 Verifique sua conexão ou se o servidor está offline.
             </p>
-            <button class="status-btn clr-gr" id="try-again-btn">Tentar novamente</button>
+            <button class="primary-btn" id="try-again-btn">Tentar novamente</button>
         </div>
     </div>
 </div>
