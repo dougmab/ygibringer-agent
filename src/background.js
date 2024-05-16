@@ -75,8 +75,24 @@ const updateAccountRequest = (message, sender, sendResponse) => {
     getCurrentAccount(currentAccount => {
         fetch(`http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}`, { method: "PUT"})
             .then(response => response.json())
-            .then(data => sendResponse(data))
-            .catch(err => sendResponse({ success: false, error: err }));
+            .then(data => {
+                // Remove os cookies do site
+                chrome.cookies.getAll({ domain: "instagram.com", name: "sessionid"}, cookie => {
+                    if (cookie[0]) {
+                        console.log(cookie[0]);
+                        chrome.cookies.remove({url: "https://instagram.com/" + cookie[0].path, name: "sessionid"});
+                    }
+                })
+                // Atualiza a tab para a página de login
+                chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+                    if (tabs.length > 0) {
+                        console.log(tabs[0].id, "TabID");
+                        chrome.tabs.sendMessage(tabs[0].id, { action: "update_tab" });
+                    }
+                })
+                sendResponse(data);
+            })
+            .catch(err => sendResponse({ success: false, error: `http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}` }));
     })
 }
 

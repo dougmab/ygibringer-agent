@@ -1,10 +1,16 @@
 (() => {
     let submit;
     chrome.runtime.onMessage.addListener((message, sender, response) => {
+        console.log(message)
         const { action } = message;
         if (action == "add_button") {
             console.log("YgiBringer login added")
             insertLoginButton();
+        }
+
+        if (action == "update_tab") {
+            console.log("logout")
+            window.location.href = "https://instagram.com"
         }
     });
 
