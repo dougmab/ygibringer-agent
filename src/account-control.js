@@ -73,9 +73,10 @@ const updateAccount = (event) => {
         if (isPasswordShowing) togglePasswordCensor();
 
         // TODO: Mensagem de operação bem-sucedida
-        chrome.runtime.sendMessage({ action: "next_account" }, (message) => {
-            if (message.success) setProfile();
-        })
+        // chrome.runtime.sendMessage({ action: "next_account" }, (message) => {
+        //     if (message.success) setProfile();
+        // })
+        // update_account agora pega a próxima conta
     })
 }
 

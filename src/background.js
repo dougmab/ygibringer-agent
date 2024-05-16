@@ -24,8 +24,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         }
 
         if (tab.url.includes("instagram.com/accounts/onetap/")) {
-            console.log("onetap")
+            console.log("Onetap page")
             chrome.tabs.update(tabId, { url: "https://www.instagram.com/accounts/convert_to_professional_account/" });
+        }
+
+        if (tab.url.includes("instagram.com/accounts/suspended/")) {
+            console.log("Account suspended")
+            chrome.tabs.sendMessage(tabId, { action: "send_suspended_status" })
         }
     }
 
@@ -43,6 +48,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action == "get_status") getCustomStatusRequest(message, sender, sendResponse);
 
     if (message.action == "check_server") checkServerRequest(message, sender, sendResponse);
+
+    if(message.action == "suspended_account") suspendedAccountRequest(message, sender, sendResponse);
 
     return true;
 })
@@ -106,7 +113,11 @@ const nextAccountRequest = (message, sender, sendResponse) => {
 
 const updateAccountRequest = (message, sender, sendResponse) => {
     getCurrentAccount(currentAccount => {
-        fetch(`http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}`, { method: "PUT"})
+        let url;
+        if (message.isSuspended) url = `http://127.0.0.1:8080/account/suspended?token=${currentAccount.token}&message=${message.statusMessage}`;
+        else url = `http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}`;
+
+        fetch(url, { method: "PUT"})
             .then(response => response.json())
             .then(data => {
                 // Remove cookie sessionid do site
@@ -124,6 +135,7 @@ const updateAccountRequest = (message, sender, sendResponse) => {
                     }
                 })
                 sendResponse(data);
+                getNextAccount();
             })
             .catch(err => sendResponse({ success: false, error: `http://127.0.0.1:8080/account/update?token=${currentAccount.token}&status=${message.status}` }));
     })
@@ -141,4 +153,8 @@ const getCustomStatusRequest = (message, sender, sendResponse) => {
             .then(response => response.json())
             .then(data => sendResponse(data))
             .catch(err => sendResponse({ success: false, error: err }));    
+}
+
+const suspendedAccountRequest = (message, sender, sendResponse) => {
+
 }
