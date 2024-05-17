@@ -38,18 +38,26 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log(sender, message.action)
+
+    chrome.storage.local.get(["settings"])
+    .then(data => {
+        console.log("settings", data.settings)
+        if (message.action == "get_account") getAccountRequest(message, sender, sendResponse);
+            
+        if (message.action == "next_account") nextAccountRequest(message, sender, sendResponse);
     
-    if (message.action == "get_account") getAccountRequest(message, sender, sendResponse);
-        
-    if (message.action == "next_account") nextAccountRequest(message, sender, sendResponse);
+        if (message.action == "update_account") updateAccountRequest(message, sender, sendResponse);
+    
+        if (message.action == "get_status") getCustomStatusRequest(message, sender, sendResponse);
+    
+        if (message.action == "check_server") checkServerRequest(message, sender, sendResponse);
+    
+        if (message.action == "suspended_account") suspendedAccountRequest(message, sender, sendResponse);
 
-    if (message.action == "update_account") updateAccountRequest(message, sender, sendResponse);
+        if (message.action == "save_settings") chrome.storage.local.set({ settings: message.settings });
 
-    if (message.action == "get_status") getCustomStatusRequest(message, sender, sendResponse);
-
-    if (message.action == "check_server") checkServerRequest(message, sender, sendResponse);
-
-    if(message.action == "suspended_account") suspendedAccountRequest(message, sender, sendResponse);
+        if (message.action == "get_settings") sendResponse(data.settings)
+    })
 
     return true;
 })
@@ -154,8 +162,4 @@ const getCustomStatusRequest = (message, sender, sendResponse) => {
             .then(response => response.json())
             .then(data => sendResponse(data))
             .catch(err => sendResponse({ success: false, error: err }));    
-}
-
-const suspendedAccountRequest = (message, sender, sendResponse) => {
-
 }

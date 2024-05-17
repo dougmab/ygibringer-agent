@@ -6,7 +6,7 @@ const statusSelect = document.querySelector("#status-select");
 
 const showBtn = document.querySelector(".show-icon");
 let isPasswordShowing = false;
-const passwordCensor = "********";
+const passwordCensor = "•••••••••";
 
 const setProfile = () => {
     console.log("Setting profile");

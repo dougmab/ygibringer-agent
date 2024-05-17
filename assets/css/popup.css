@@ -4,7 +4,14 @@
     box-sizing: border-box;
 }
 
-/* account.html */
+body {
+    background-color: #15161B;
+}
+
+.container {
+    width: 330px;
+    color: #fff;
+}
 
 .header {
     display: flex;
@@ -15,7 +22,15 @@
     height: 28px;
 }
 
+.header .logo {
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+}
+
 .header h1 {
+    display: flex;
+    align-items: center;
     font-size: 14px;
     cursor: default;
 }
@@ -31,11 +46,7 @@
     background-image: url("../img/settings_fill.svg");
 }
 
-.container {
-    width: 330px;
-    color: #fff;
-    background-color: #15161B;
-}
+/* account.html */
 
 .account {
     padding: 10px;
@@ -159,4 +170,40 @@
     to {
         transform: rotate(0deg);
     }
+}
+
+/* settings.html */
+
+.settings {
+    padding: 10px;
+}
+
+.settings h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.settings label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.settings label input {
+    margin-left: 4px;
+}
+
+.settings label input[type="text"] {
+    border-radius: 5px;
+    border: 1px solid white;
+    padding: 2px;
+    outline: none;
+}
+
+.settings label input[type="text"]:focus {
+   outline: 1px solid #3fb6f3;
+}
+
+.settings .primary-btn {
+    margin-top: 16px;
 }

@@ -23,7 +23,8 @@
           "assets/img/more.svg",
           "assets/img/visibility.svg",
           "assets/img/visibility_off.svg",
-          "assets/img/sync.svg"
+          "assets/img/sync.svg",
+          "assets/icons/icon64.png"
         ],
         "matches": ["https://*.instagram.com/*"]
       
@@ -31,8 +32,10 @@
     ],
     "action" : {
         "default_icons": {
-            "48": "assets/img/icon.png",
-            "128": "assets/img/icon.png"
+            "16": "assets/icons/icon16.png",
+            "32": "assets/icons/icon32.png",
+            "48": "assets/icons/icon48.png",
+            "128": "assets/icons/icon128.png"
           },
         "default_title": "YgiBringer Agent",
         "default_popup": "verify-server.html"
