@@ -1,15 +1,17 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (tab.url) {
 
-        // Não espera a página carregar pra dar redirect
-        if (tab.url.includes("instagram.com/accounts/onetap/")) {
-            chrome.tabs.update(tabId, { url: "https://www.instagram.com/accounts/convert_to_professional_account/" });
-        }
+        chrome.storage.local.get(["settings"])
+        .then(data => {
+            const { settings } = data;
 
-        if (changeInfo.status == "complete") {
-            chrome.storage.local.get(["settings"])
-            .then(data => {
-                const { settings } = data;
+            // Não espera a página carregar pra dar redirect
+            if (tab.url.includes("instagram.com/accounts/onetap/")) {
+                if (settings.redirectCreator) chrome.tabs.update(tabId, { url: "https://www.instagram.com/accounts/convert_to_professional_account/" });
+
+            }
+
+            if (changeInfo.status == "complete") {
 
                 if (tab.url.includes("instagram.com/accounts/login/")) {           
                     chrome.tabs.sendMessage(tabId, {
@@ -22,7 +24,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                     checkLoginStateAndExecute(
                         // If logged
                         () => {
-                            chrome.tabs.update(tabId, { url: "https://www.instagram.com/accounts/convert_to_professional_account/" });
+                            if (redirectCreator)
+                                chrome.tabs.update(tabId, { url: "https://www.instagram.com/accounts/convert_to_professional_account/" });
                         },
                         // If not logged
                         () => {
@@ -37,8 +40,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                     console.log("Account suspended");
                     chrome.tabs.sendMessage(tabId, { action: "send_suspended_status" });
                 }
-            });
-        }
+            }
+        });
     }
 });
 
@@ -149,7 +152,7 @@ const updateAccountRequest = (message, sender, sendResponse, settings) => {
                         chrome.tabs.update(tabs[0].id, { url: "https://www.instagram.com/" });
                     }
                 })
-                getNextAccount()
+                getNextAccount(settings.serverUrl)
                 .then(data => sendResponse(data));
                 // sendResponse(data);
             })
