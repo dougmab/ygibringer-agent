@@ -2,23 +2,24 @@
     let submit;
     chrome.runtime.onMessage.addListener((message, sender, response) => {
         console.log(message)
-        const { action } = message;
+        const { action, settings } = message;
         if (action == "add_button") {
-            insertLoginButton();
+            insertLoginButton(settings);
         }
 
-        if (action == "send_suspended_status") sendSuspendedStatus()
+        if (action == "send_suspended_status") sendSuspendedStatus(settings)
     });
 
-    const insertLoginButton = () => {
+    const insertLoginButton = (settings) => {
             submit = document.querySelector("button");
 
             if (!submit) {
                 console.log("Page not loaded yet")
-                setTimeout(insertLoginButton, 10);
+                setTimeout(() => insertLoginButton(settings), 10);
                 return;
-            };
-            console.log("Page loaded")
+            }
+
+            console.log("Page loaded");
 
             const loginBtnExists = document.querySelector(".login-ab-btn");
 
@@ -32,7 +33,12 @@
             loginBtn.addEventListener("click", getCurrentAccount);
 
             submitParent.appendChild(loginBtn);
-            console.log("YgiBringer login added")
+
+            console.log(settings)
+
+            if (settings.autoLogin) loginBtn.click();
+
+            console.log("YgiBringer login added");
         }
 
 const getCurrentAccount = (e) => {
