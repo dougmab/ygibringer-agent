@@ -5,12 +5,12 @@
     "permissions": ["storage", "tabs", "cookies", "http://localhost/*"],
     "host_permissions": ["https://*.instagram.com/*"],
     "background": {
-      "service_worker": "dist/background.bundle.js"
+      "service_worker": "src/background.js"
     },
     "content_scripts": [
       {
         "matches": ["https://*.instagram.com/*"],
-        "js": ["dist/content.bundle.js"],
+        "js": ["src/content.js"],
         "css": ["assets/css/content.css"]
       }
     ],

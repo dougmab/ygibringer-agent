@@ -50,7 +50,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     chrome.storage.local.get(["settings"])
     .then(data => {
-        console.log("settings", data.settings)
+        // console.log("settings", data.settings)
         const { settings } = data;
         if (message.action == "get_account") getAccountRequest(message, sender, sendResponse, settings);
             
@@ -72,12 +72,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
 })
 
-const getCurrentAccount = callback => {
-    chrome.storage.local.get(['token', 'login', 'password'], data => {
-        const currentAccount = { ...data };
-        callback(currentAccount);
-    })
-}
 
 const checkLoginStateAndExecute = (isLoggedCallback, isNotLoggedCallback)  => {
     chrome.cookies.getAll({ domain: "instagram.com", name: "sessionid"}, cookie => {
@@ -91,82 +85,115 @@ const checkLoginStateAndExecute = (isLoggedCallback, isNotLoggedCallback)  => {
     })
 }
 
-const getNextAccount = (url) => {
+const getCurrentAccount = (settings, callback) => {
+    // chrome.storage.local.get(["user", "login", "password"], data => {
+    //     const currentAccount = { ...data };
+    //     callback(currentAccount);
+    // });
+
+    fetch(`${settings.serverUrl}/account/get?user=${settings.username}`)
+    .then(response => {
+        if (response.status == 403) {
+            throw new Error("Nenhuma conta associada a este usuário")
+        }
+        return response.json()
+    })
+    .then(data => callback(data))
+    .catch(error => callback({ success: false , error}))
+}
+
+const getNextAccount = (settings) => {
     console.log("Getting next account")
-    return fetch(`${url}/account/next`)
+    return fetch(`${settings.serverUrl}/account/next?user=${settings.username}`)
         .then(response => {
             if (response.status === 204) {
-                chrome.storage.local.remove(["token", "login", "password"], () => {});
-                return ({ success: false, error: { type: "end_of_list", message: "List has reached it's end"} });
+                // chrome.storage.local.remove(["user", "login", "password"], () => {});
+                // return ({ success: false, error: { type: "end_of_list", message: "List has reached it's end"} });
+                throw new Error("Fim da lista");
             }
+            if (response.status === 403) throw new Error("Usuário está ocupado");
             return response.json()
         })
         .then(response => {
-            if (response.success) {
-                console.log(response, "next")
-                chrome.storage.local.set(response.data);
-                return response
-            }
+            return response;
         })
-        .catch(err => ({ success: false, error: err }))
+        .catch(error => ({ success: false, error }))
 }
 
 const getAccountRequest = (message, sender, sendResponse, settings) => {
-    getCurrentAccount(currentAccount => {
-        console.log(currentAccount)
-        if (currentAccount.token) {
-            sendResponse({ success: true, data: currentAccount });
+    getCurrentAccount(settings, response => {
+        console.log(response)
+        if (response.success) {
+            console.log("CONTA EXISTE")
+            sendResponse({ ...response });
             return;
         }
-        getNextAccount(settings.serverUrl)
-            .then(response => sendResponse(response));
+        console.log("CONTA NÃO EXISTE AQUI")
+        getNextAccount(settings)
+            .then(response => sendResponse({ ...response }));
     })
 }
 
 const nextAccountRequest = (message, sender, sendResponse, settings) => {
-    getNextAccount(settings.serverUrl)
-            .then(account => sendResponse({ success: true, data: account }))
-            .catch(err => sendResponse({ success: false, error: err }));
+    getNextAccount(settings)
+            .then(response => sendResponse({ ...response }))
+            .catch(error => sendResponse({ success: false, error }));
 }
 
 const updateAccountRequest = (message, sender, sendResponse, settings) => {
-    getCurrentAccount(currentAccount => {
+    getCurrentAccount(settings, response => {
         let url;
-        if (message.isSuspended) url = `${settings.serverUrl}/account/suspended?token=${currentAccount.token}&message=${message.statusMessage}`;
-        else url = `${settings.serverUrl}/account/update?token=${currentAccount.token}&status=${message.status}`;
+        if (!response.success) {
+            sendResponse({ ...response });
+            return;
+        }
+
+        const { user } = response.data;
+        if (message.isSuspended) url = `${settings.serverUrl}/account/suspended?user=${user}&message=${message.statusMessage}`;
+        else url = `${settings.serverUrl}/account/update?user=${user}&status=${message.status}`;
 
         fetch(url, { method: "PUT"})
-            .then(response => response.json())
-            .then(data => {
-                // Remove cookie sessionid do site
-                chrome.cookies.getAll({ domain: "instagram.com", name: "sessionid"}, cookie => {
-                    if (cookie[0]) {
-                        console.log(cookie[0]);
-                        chrome.cookies.remove({url: "https://instagram.com/" + cookie[0].path, name: "sessionid"}, (removedCookie) => {
+        .then(response => {
+            if (response.status == 403) {
+                throw new Error("Nenhuma conta associada a este usuário")
+            }
+            return response.json()
+        })
+        .then(data => {
+            getNextAccount(settings)
+                .then(response => sendResponse({ ...response }));
+
+            // Remove cookie sessionid do site
+            console.log("OLHA O COOKIE")
+            chrome.cookies.getAll({ domain: "instagram.com"}, cookies => {
+                console.log(cookies)
+                if (cookies[0]) {
+                    for (const cookie of cookies) {
+                        chrome.cookies.remove({url: "https://instagram.com/" + cookie.path, name: cookie.name}, (removedCookie) => {
                             if (removedCookie) {
                                 console.log("Cookie removido", removedCookie)
-                            }    
-                            
-                            // Atualiza a tab para a página de login
-                            chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
-                                if (tabs.length > 0) {
-                                    console.log(tabs[0].id, "TabID");
-                                    chrome.tabs.update(tabs[0].id, { url: "https://www.instagram.com/" });
-                                    if (message.isSuspended) {
-                                        chrome.tabs.sendMessage(tabs[0].id, { action: "get_account" })
-                                    }
-                                }
-                            })
-                            getNextAccount(settings.serverUrl)
-                            .then(data => sendResponse(data));
-                        });
+                            }
+                        })
                     }
-                });
-                
-                // sendResponse(data);
-            })
-            .catch(err => sendResponse({ success: false, error: err }));
-    })
+                        // Atualiza a tab para a página de login
+                        chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+                            if (tabs.length > 0) {
+                                // console.log(tabs[0].id, "TabID");
+                                chrome.tabs.update(tabs[0].id, { url: "https://www.instagram.com/" });
+                                if (message.isSuspended) {
+                                    chrome.tabs.sendMessage(tabs[0].id, { action: "get_account" })
+                                }
+                            }
+                        });
+                }
+            });
+        })
+        .catch(err => {
+            console.log("Apaguei tudo")
+            chrome.tabs.sendMessage(tabs[0].id, { action: "get_account" })
+            sendResponse({ success: false, error: { type: "no_account_associated"} })
+        });
+    });
 }
 
 const checkServerRequest = (message, sender, sendResponse, settings) => {

@@ -87,9 +87,12 @@ const togglePasswordCensor = () => {
 }
 
 const updateAccount = (event) => {
+    console.log("CHAMOU O UPDATEEEE")
     chrome.runtime.sendMessage({ action: "update_account", status: statusSelect.options[statusSelect.selectedIndex].dataset.index }, (message) => {
-        console.log(message);
-        if (!message.success) {} // TODO: Mensagem de erro no popup
+        console.log(message, "AAAAAAAAAAAA");
+        // if (!message.success) {
+        //     setProfile()
+        // } // TODO: Mensagem de erro no popup
 
         if (isPasswordShowing) togglePasswordCensor();
         

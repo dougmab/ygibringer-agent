@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <link href="/assets/css/popup.css" rel="stylesheet" type="text/css" />
-<script type="module" src="/dist/settings.bundle.js"></script>
+<script type="module" src="/src/settings.js"></script>
 
 <div class="container">
     <div class="header">
@@ -9,6 +9,10 @@
       </div>
       <div class="settings">
         <h2>Configurações</h2>
+        <label for="username">
+            Nome de usuário:
+            <input type="text" id="username" value="">
+        </label>
         <label for="server-url">
             URL do servidor:
             <input type="text" id="server-url" value="http://localhost:8080">
