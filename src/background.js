@@ -142,18 +142,27 @@ const updateAccountRequest = (message, sender, sendResponse, settings) => {
                 chrome.cookies.getAll({ domain: "instagram.com", name: "sessionid"}, cookie => {
                     if (cookie[0]) {
                         console.log(cookie[0]);
-                        chrome.cookies.remove({url: "https://instagram.com/" + cookie[0].path, name: "sessionid"});
+                        chrome.cookies.remove({url: "https://instagram.com/" + cookie[0].path, name: "sessionid"}, (removedCookie) => {
+                            if (removedCookie) {
+                                console.log("Cookie removido", removedCookie)
+                            }    
+                            
+                            // Atualiza a tab para a página de login
+                            chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+                                if (tabs.length > 0) {
+                                    console.log(tabs[0].id, "TabID");
+                                    chrome.tabs.update(tabs[0].id, { url: "https://www.instagram.com/" });
+                                    if (message.isSuspended) {
+                                        chrome.tabs.sendMessage(tabs[0].id, { action: "get_account" })
+                                    }
+                                }
+                            })
+                            getNextAccount(settings.serverUrl)
+                            .then(data => sendResponse(data));
+                        });
                     }
-                })
-                // Atualiza a tab para a página de login
-                chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
-                    if (tabs.length > 0) {
-                        console.log(tabs[0].id, "TabID");
-                        chrome.tabs.update(tabs[0].id, { url: "https://www.instagram.com/" });
-                    }
-                })
-                getNextAccount(settings.serverUrl)
-                .then(data => sendResponse(data));
+                });
+                
                 // sendResponse(data);
             })
             .catch(err => sendResponse({ success: false, error: err }));

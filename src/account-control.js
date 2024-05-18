@@ -8,6 +8,11 @@ const showBtn = document.querySelector(".show-icon");
 let isPasswordShowing = false;
 const passwordCensor = "•••••••••";
 
+chrome.runtime.onMessage.addListener((message, sender, response) => {
+    const { action } = message;
+    if (action == "get_account") setProfile();
+})
+
 const setProfile = () => {
     console.log("Setting profile");
 
