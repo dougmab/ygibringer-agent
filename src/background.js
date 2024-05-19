@@ -50,7 +50,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     chrome.storage.local.get(["settings"])
     .then(data => {
-        // console.log("settings", data.settings)
         const { settings } = data;
         if (message.action == "get_account") getAccountRequest(message, sender, sendResponse, settings);
             
@@ -86,11 +85,6 @@ const checkLoginStateAndExecute = (isLoggedCallback, isNotLoggedCallback)  => {
 }
 
 const getCurrentAccount = (settings, callback) => {
-    // chrome.storage.local.get(["user", "login", "password"], data => {
-    //     const currentAccount = { ...data };
-    //     callback(currentAccount);
-    // });
-
     fetch(`${settings.serverUrl}/account/get?user=${settings.username}`)
     .then(response => {
         if (response.status == 403) {
@@ -107,8 +101,6 @@ const getNextAccount = (settings) => {
     return fetch(`${settings.serverUrl}/account/next?user=${settings.username}`)
         .then(response => {
             if (response.status === 204) {
-                // chrome.storage.local.remove(["user", "login", "password"], () => {});
-                // return ({ success: false, error: { type: "end_of_list", message: "List has reached it's end"} });
                 throw new Error("Fim da lista");
             }
             if (response.status === 403) throw new Error("Usuário está ocupado");
@@ -117,37 +109,44 @@ const getNextAccount = (settings) => {
         .then(response => {
             return response;
         })
-        .catch(error => ({ success: false, error }))
+        .catch(error => {
+            console.log(error)
+            return ({ success: false, error })
+        });
 }
 
 const getAccountRequest = (message, sender, sendResponse, settings) => {
     getCurrentAccount(settings, response => {
         console.log(response)
         if (response.success) {
-            console.log("CONTA EXISTE")
+            console.log("User is associated")
             sendResponse({ ...response });
             return;
         }
-        console.log("CONTA NÃO EXISTE AQUI")
+        console.log("User is not associated")
         getNextAccount(settings)
-            .then(response => sendResponse({ ...response }));
-    })
-}
+            .then(response => {
+                if (!response.success) throw new Error(response.error.message);
+                sendResponse({ ...response })
+            })
+            .catch(error => sendResponse({ success: false, message: error.message }));
+            });
+    }
 
 const nextAccountRequest = (message, sender, sendResponse, settings) => {
     getNextAccount(settings)
             .then(response => sendResponse({ ...response }))
-            .catch(error => sendResponse({ success: false, error }));
+            .catch(error => sendResponse({ success: false, message: error.message }));
 }
 
 const updateAccountRequest = (message, sender, sendResponse, settings) => {
     getCurrentAccount(settings, response => {
-        let url;
         if (!response.success) {
             sendResponse({ ...response });
             return;
         }
-
+        
+        let url;
         const { user } = response.data;
         if (message.isSuspended) url = `${settings.serverUrl}/account/suspended?user=${user}&message=${message.statusMessage}`;
         else url = `${settings.serverUrl}/account/update?user=${user}&status=${message.status}`;
@@ -188,7 +187,7 @@ const updateAccountRequest = (message, sender, sendResponse, settings) => {
                 }
             });
         })
-        .catch(err => {
+        .catch(error => {
             console.log("Apaguei tudo")
             chrome.tabs.sendMessage(tabs[0].id, { action: "get_account" })
             sendResponse({ success: false, error: { type: "no_account_associated"} })
@@ -200,12 +199,12 @@ const checkServerRequest = (message, sender, sendResponse, settings) => {
     fetch(`${settings.serverUrl}/info/health`)
             .then(response => response.json())
             .then(data => sendResponse(data))
-            .catch(err => sendResponse({ success: false }));
+            .catch(error => sendResponse({ success: false }));
 }
 
 const getCustomStatusRequest = (message, sender, sendResponse, settings) => {
     fetch(`${settings.serverUrl}/status`)
             .then(response => response.json())
             .then(data => sendResponse(data))
-            .catch(err => sendResponse({ success: false, error: err }));    
+            .catch(error => sendResponse({ success: false, message: error.message }));    
 }

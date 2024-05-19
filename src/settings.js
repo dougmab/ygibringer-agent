@@ -4,6 +4,8 @@ const autoLogin = document.querySelector("#auto-login");
 const redirectCreator = document.querySelector("#redirect-creator");
 const username = document.querySelector("#username");
 
+const notification = document.querySelector(".notification");
+
 const saveBtn = document.querySelector("#save-btn");
 
 chrome.runtime.sendMessage({ action: "get_settings" }, (settings) => {
@@ -25,4 +27,15 @@ saveBtn.addEventListener("click", () => {
     chrome.runtime.sendMessage({ action: "save_settings", settings }, () => {
         console.log("Saved", settings);
     })
+
+    displayNotification("Configurações salvas")
 })
+
+const displayNotification = (message) => {
+    notification.innerText = message;
+    notification.style.animation = "fade-out 5s alternate"
+    setTimeout(() => {
+        notification.innerText = "";
+        notification.style.animation = 'none';
+    }, 5000)
+}

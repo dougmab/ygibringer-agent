@@ -2,6 +2,8 @@ const sendBtn = document.querySelector("#send-btn");
 const userInput = document.querySelector("#login");
 const passInput = document.querySelector("#password");
 
+const notification = document.querySelector(".notification");
+
 const statusSelect = document.querySelector("#status-select");
 
 const showBtn = document.querySelector(".show-icon");
@@ -17,6 +19,12 @@ const setProfile = () => {
     console.log("Setting profile");
 
     chrome.runtime.sendMessage({ action: "get_account" }, (response) => {
+
+        if (!response.success) {
+            displayNotification(response.message);
+            return;
+        }
+
         const userInput = document.querySelector("#login");
         const passInput = document.querySelector("#password");
 
@@ -33,13 +41,12 @@ const setProfile = () => {
 }
 
 const getCustomStatus = () => {
-    chrome.runtime.sendMessage({ action: "get_status" }, (message) => {
-
-        if (!message.success) return;
+    chrome.runtime.sendMessage({ action: "get_status" }, (response) => {
+        if (!response.success) return;
 
         let isFirstOptAppended = false;
-        for (const i in message.data) {
-            const status = message.data[i]; 
+        for (const i in response.data) {
+            const status = response.data[i]; 
             console.log(status);
 
             const option = document.createElement("option");
@@ -48,8 +55,6 @@ const getCustomStatus = () => {
             option.setAttribute("data-type", status.type);
             option.textContent = status.title;
             option.value = status.value;
-
-            // option.addEventListener("click", updateAccount);
 
             if (!isFirstOptAppended) {
                 statusSelect.className = `select-${status.type.toLowerCase()}-opt`;
@@ -87,27 +92,24 @@ const togglePasswordCensor = () => {
 }
 
 const updateAccount = (event) => {
-    console.log("CHAMOU O UPDATEEEE")
-    chrome.runtime.sendMessage({ action: "update_account", status: statusSelect.options[statusSelect.selectedIndex].dataset.index }, (message) => {
-        console.log(message, "AAAAAAAAAAAA");
-        // if (!message.success) {
-        //     setProfile()
-        // } // TODO: Mensagem de erro no popup
-
+    chrome.runtime.sendMessage({ action: "update_account", status: statusSelect.options[statusSelect.selectedIndex].dataset.index }, (response) => {
+        if (!response.success) displayNotification(response.message);
         if (isPasswordShowing) togglePasswordCensor();
-        
-        // console.log(message, "Account updated popup")
         setProfile();
-
-        // TODO: Mensagem de operação bem-sucedida
-        // chrome.runtime.sendMessage({ action: "next_account" }, (message) => {
-        // })
-        // update_account agora pega a próxima conta
     })
 }
 
 sendBtn.addEventListener("click", updateAccount)
 showBtn.addEventListener("click", togglePasswordCensor)
+
+const displayNotification = (message) => {
+    notification.innerText = message;
+    notification.style.animation = "fade-out 5s alternate"
+    setTimeout(() => {
+        notification.innerText = "";
+        notification.style.animation = 'none';
+    }, 5000)
+}
 
 setProfile();
 getCustomStatus();
