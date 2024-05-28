@@ -92,10 +92,13 @@ const togglePasswordCensor = () => {
 }
 
 const updateAccount = (event) => {
+    sendBtn.disabled = true;
     chrome.runtime.sendMessage({ action: "update_account", status: statusSelect.options[statusSelect.selectedIndex].dataset.index }, (response) => {
         if (!response.success) displayNotification(response.message);
         if (isPasswordShowing) togglePasswordCensor();
         setProfile();
+
+        setTimeout(() => sendBtn.disabled = false, 1000);
     })
 }
 

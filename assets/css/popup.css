@@ -59,6 +59,21 @@ body {
     background-image: url("../img/settings_fill.svg");
 }
 
+.primary-btn {
+    padding: 2px 5px;
+    background-color: #fff;
+    border: none;
+    border-radius: 5px;
+    color: #0d0e11;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.primary-btn:disabled {
+    background-color: #858585;
+    cursor: default;
+}
+
 @keyframes fade-out {
     0% {
         opacity: 0;
@@ -131,16 +146,6 @@ body {
     border-color: #ff0f0f;
     color: #ff0f0f;
     outline: none;
-}
-
-.primary-btn {
-    padding: 2px 5px;
-    background-color: #fff;
-    border: none;
-    border-radius: 5px;
-    color: #0d0e11;
-    font-weight: bold;
-    cursor: pointer;
 }
 
 .clr-gr {
