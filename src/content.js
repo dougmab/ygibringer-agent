@@ -3,11 +3,9 @@
     chrome.runtime.onMessage.addListener((message, sender, response) => {
         console.log(message)
         const { action, settings } = message;
-        if (action == "add_button") {
-            insertLoginButton(settings);
-        }
-
-        if (action == "send_suspended_status") sendSuspendedStatus(settings)
+        if (action == "add_button") insertLoginButton(settings);
+        if (action == "send_suspended_status") sendSuspendedStatus(settings);
+        if (action == "send_success_status") sendSuccessStatus(settings);
     });
 
     const insertLoginButton = (settings) => {
@@ -57,6 +55,7 @@ const getCurrentAccount = (e) => {
         writeToInput(userInput, login);
         writeToInput(passInput, password);
         submit.click();
+        waitForWrongPasswordWarn();
     }); 
 }
 
@@ -64,6 +63,36 @@ const getCurrentAccount = (e) => {
         if (!append) input.value = ""
         input.focus();
         document.execCommand('insertText', false, content);
+    }
+
+    const waitForWrongPasswordWarn = () => {
+        const wrongPassWarn = document.querySelector("._ab2z");
+        if (!wrongPassWarn) {
+            setTimeout(waitForWrongPasswordWarn, 300);
+            return;
+        }
+
+        console.log("Senha incorreta");
+
+        chrome.runtime.sendMessage({ action: "get_status" }, (response) => {
+            console.log(response)
+            if (!response.settings.autoWrongPassword) return;
+
+            for (const i in response.data) {
+                if (response.data[i].title.toLowerCase().includes("senha")) {
+                    chrome.runtime.sendMessage({ action: "update_account", status: i })
+                    break;
+                }
+            }
+        });
+
+        // chrome.runtime.sendMessage({ action: "update_account", status: statusSelect.options[statusSelect.selectedIndex].dataset.index }, (response) => {
+        //     if (!response.success) displayNotification(response.message);
+        //     if (isPasswordShowing) togglePasswordCensor();
+        //     setProfile();
+    
+        //     setTimeout(() => sendBtn.disabled = false, 1000);
+        // })
     }
 
     const sendSuspendedStatus = () => {
@@ -80,6 +109,21 @@ const getCurrentAccount = (e) => {
         if (dateMessage) {
             console.log("Status enviado")
             chrome.runtime.sendMessage({ action: "update_account", isSuspended: true, statusMessage: dateMessage });
+        }
+    }
+
+    const sendSuccessStatus = (settings) => {
+        const accountState = document.querySelector('h2[class="x1lliihq x1plvlek xryxfnj x1n2onr6 x193iq5w xeuugli x1fj9vlw x13faqbe x1vvkbs x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1i0vuye x1ms8i2q x1xlr1w8 x5n08af x10wh9bi x1wdrske x8viiok x18hxmgj"]');
+        
+        if (!accountState) {
+                console.log("Page not loaded yet")
+                setTimeout(() => sendSuccessStatus(settings), 50);
+                return;
+        }
+
+        const accountStateStr = accountState.innerText.toLowerCase();
+        if ((settings.autoSuccess && accountStateStr == "empresa" || accountStateStr == "business")) {
+            chrome.runtime.sendMessage({ action: "update_account", status: 0 });
         }
     }
 })()

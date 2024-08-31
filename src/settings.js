@@ -1,6 +1,8 @@
 // opções
 const serverUrl = document.querySelector("#server-url");
 const autoLogin = document.querySelector("#auto-login");
+const autoSuccess = document.querySelector("#auto-success");
+const autoWrongPassword = document.querySelector("#auto-wrong-password");
 const redirectCreator = document.querySelector("#redirect-creator");
 const username = document.querySelector("#username");
 
@@ -13,7 +15,9 @@ chrome.runtime.sendMessage({ action: "get_settings" }, (settings) => {
     if (settings.username) username.value = settings.username;
     if (settings.serverUrl) serverUrl.value = settings.serverUrl;
     if (settings.autoLogin) autoLogin.checked = settings.autoLogin;
+    if (settings.autoSuccess) autoSuccess.checked = settings.autoSuccess;
     if (settings.redirectCreator) redirectCreator.checked = settings.redirectCreator;
+    if (settings.autoWrongPassword) autoWrongPassword.checked = settings.autoWrongPassword;
 })
 
 saveBtn.addEventListener("click", () => {
@@ -21,7 +25,9 @@ saveBtn.addEventListener("click", () => {
         username: username.value,
         serverUrl: serverUrl.value,
         autoLogin: autoLogin.checked,
-        redirectCreator: redirectCreator.checked
+        autoWrongPassword: autoWrongPassword.checked,
+        redirectCreator: redirectCreator.checked,
+        autoSuccess: autoSuccess.checked
     };
 
     chrome.runtime.sendMessage({ action: "save_settings", settings }, () => {

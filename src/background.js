@@ -1,6 +1,5 @@
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (tab.url) {
-
         chrome.storage.local.get(["settings"])
         .then(data => {
             const { settings } = data;
@@ -39,6 +38,10 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 if (tab.url.includes("instagram.com/accounts/suspended/")) {
                     console.log("Account suspended");
                     chrome.tabs.sendMessage(tabId, { action: "send_suspended_status" });
+                }
+
+                if (tab.url.includes("instagram.com/accounts/professional_account_tools/")) {
+                    chrome.tabs.sendMessage(tabId, { action: "send_success_status", settings });
                 }
             }
         });
@@ -205,6 +208,6 @@ const checkServerRequest = (message, sender, sendResponse, settings) => {
 const getCustomStatusRequest = (message, sender, sendResponse, settings) => {
     fetch(`${settings.serverUrl}/status`)
             .then(response => response.json())
-            .then(data => sendResponse(data))
+            .then(data => sendResponse({ ...data, settings }))
             .catch(error => sendResponse({ success: false, message: error.message }));    
 }
